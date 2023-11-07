@@ -1,0 +1,23 @@
+#version 330 core
+
+in vec3 inPosition;
+in vec2 inUV;
+in vec3 inNormal;
+
+out vec2 fragUV;
+out vec3 fragNormal;
+out vec3 fragLightDir;
+
+uniform mat4 MVP;
+uniform mat4 M;
+uniform vec3 lightPosition;
+
+void main() {
+
+    vec4 worldPosition = M * vec4(inPosition, 1.0);
+    fragUV = inUV;
+    fragNormal = normalize(mat3(transpose(inverse(M))) * inNormal);
+    fragLightDir = lightPosition - worldPosition.xyz;
+
+    gl_Position = MVP * vec4(inPosition, 1.0);
+}
