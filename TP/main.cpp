@@ -15,32 +15,6 @@
 
 #include "pointlight.h"
 
-std::vector<glm::vec3> CreateSphere(float radius, int sectorCount, int stackCount) {
-    std::vector<glm::vec3> vertices;
-
-    float x, y, z, xy;
-    float sectorStep = 2 * glm::pi<float>() / sectorCount;
-    float stackStep = glm::pi<float>() / stackCount;
-    float sectorAngle, stackAngle;
-
-    for (int i = 0; i <= stackCount; ++i) {
-        stackAngle = glm::pi<float>() / 2 - i * stackStep;  // range from -pi/2 to pi/2
-        xy = radius * cos(stackAngle);  // r * cos(theta)
-        z = radius * sin(stackAngle);   // r * sin(theta)
-
-        for (int j = 0; j <= sectorCount; ++j) {
-            sectorAngle = j * sectorStep;  // range from 0 to 2pi
-            x = xy * cos(sectorAngle);  // r * cos(theta) * cos(phi)
-            y = xy * sin(sectorAngle);  // r * cos(theta) * sin(phi)
-            vertices.push_back(glm::vec3(x, y, z));
-        }
-    }
-
-    return vertices;
-}
-
-
-
 using namespace std;
 
 int main()
@@ -51,7 +25,6 @@ int main()
         fprintf(stderr, "Failed to initialize GLFW\n");
         return -1;
     }
-
 
     glfwWindowHint(GLFW_SAMPLES, 4); //antialiasing
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); //version 3.3
@@ -82,8 +55,6 @@ int main()
 
     //Enfin on définit la fenêtre créée comme la fenêtre sur laquelle on va dessiner
     glfwMakeContextCurrent(window);
-
-
 
     //Initialisation de GLEW
     glewExperimental=true;
@@ -183,47 +154,15 @@ int main()
         glm::vec2(0.667979f, 1.0f-0.335851f)
     };
 
-//    std::vector<glm::vec3> sphereVertices = CreateSphere(1.0f, 30, 30);
-
     Object o(g_vertex_buffer_data, g_uv_buffer_data, path+"/textures/mars.jpg");
-
-//    ObjModel objModel;
-//    objModel.LoadFromFile("/home/formation/Documents/TP/models/mars.obj");
-
-//    std::vector<float> vertices = objModel.GetVertexData();
-//    int vertexCount = objModel.GetVertexCount();
-
-//    Object o(vertices, g_uv_buffer_data, path+"/textures/mars.jpg");
-
-    glm::vec3 lightPosition(0.0f, 0.0f, 0.0f);
-    glm::vec3 lightColor(1.0f, 1.0f, 1.0f); // Couleur blanche
-    float lightPower = 1.0f;
-
-    PointLight light(lightPosition, lightColor, lightPower);
-    light.Bind(shader);
-
-    cam.computeMatrices(width, height);
-    glm::mat4 m = o.getModelMatrix();
-    glm::mat4 v = cam.getViewMatrix();
-    glm::mat4 p = cam.getProjectionMatrix();
-
-    glm::mat4 mvp = p*v*m;
-
-    shader.setUniformMat4f("MVP", mvp);
-
 
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-
-    glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
-
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-
-
     float lastTime = glfwGetTime();
     float currentTime, deltaTime;
-
 
     while(glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && !glfwWindowShouldClose(window)){
 
@@ -231,38 +170,30 @@ int main()
         deltaTime = currentTime-lastTime;
         lastTime = currentTime;
 
-//        o.rotationAngles.y=currentTime;
+        o.rotationAngles.y=currentTime;
         controls.update(deltaTime, &shader);
         cam.computeMatrices(width, height);
-        m = o.getModelMatrix();
-        v = cam.getViewMatrix();
-        p = cam.getProjectionMatrix();
 
-        mvp = p*v*m;
-        shader.setUniformMat4f("MVP", mvp);
+        glm::vec3 lightPosition(-10.0f, -10.0f, -10.0f);
+        glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 
+        PointLight light(lightPosition, lightColor, 1.0f);
+        shader.setUniform3fv("lightColor", light.color);
+        shader.setUniform3fv("lightPosition", lightPosition);
+//        light.Bind(shader);
 
-        ////////////////On commence par vider les buffers///////////////
+        shader.setUniformMat4f("model", o.getModelMatrix());
+        shader.setUniformMat4f("view", cam.getViewMatrix());
+        shader.setUniformMat4f("projection", cam.getProjectionMatrix());
         renderer.Clear();
         renderer.Draw(va, o, shader);
 
-        /*o.position.x=2;
-        m = o.getModelMatrix();
-        v = cam.getViewMatrix();
-        p = cam.getProjectionMatrix();
 
-        mvp = p*v*m;
-        shader.setUniformMat4f("MVP", mvp);
-        renderer.Draw(va, o, shader);*/
 
-        ////////////////Partie rafraichissement de l'image et des évènements///////////////
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
     glfwTerminate();
-
-
-
 
     return 0;
 }

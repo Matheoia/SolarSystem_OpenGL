@@ -10,15 +10,19 @@ PointLight::~PointLight() {}
 void PointLight::Bind(Shader& shader)
 {
     shader.Bind();
-    GLuint shaderProgramID = shader.GetRendererID();
-    glUseProgram(shaderProgramID);
+    shader.setUniform3fv("lightPosition", position);
+    shader.setUniform3fv("lightColor", color);
+    shader.setUniform1f("lightPower", power);
+//    GLuint shaderProgramID = shader.GetRendererID();
+//    glUseProgram(shaderProgramID);
 
-    glUniform3f(glGetUniformLocation(shaderProgramID, "pointLight.position"), position.x, position.y, position.z);
-    glUniform3f(glGetUniformLocation(shaderProgramID, "pointLight.color"), color.x, color.y, color.z);
-    glUniform1f(glGetUniformLocation(shaderProgramID, "pointLight.power"), power);
+//    glUniform3f(glGetUniformLocation(shaderProgramID, "pointLight.position"), position);
+//    glUniform3f(glGetUniformLocation(shaderProgramID, "pointLight.color"), color.x, color.y, color.z);
+//    glUniform1f(glGetUniformLocation(shaderProgramID, "pointLight.power"), power);
 
 }
 
-void PointLight::Unbind(){
+void PointLight::Unbind()
+{
 
 }
