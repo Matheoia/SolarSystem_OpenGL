@@ -76,11 +76,9 @@ int main()
 
     Shader shaderSoleil(path+"/shaders/soleil.vertexshader", path+"/shaders/soleil.fragmentshader");
 
-
     VertexArray va;
     va.Bind();
     Camera cam(width, height);
-
 
     Object stars("/home/formation/Documents/OpenGL/TP/models/sphere.obj", path+"/textures/stars.jpg");
     stars.position.x = 0;
@@ -269,9 +267,6 @@ int main()
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
-//    interface.~UserInterface();
     glfwTerminate();
-
     return 0;
 }
